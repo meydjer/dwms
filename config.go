@@ -6,12 +6,12 @@ import (
 
 const (
 	Unknown      = "?"
-	UpdatePeriod = 5 * time.Second
+	UpdatePeriod = time.Second
 )
 
 var Items = []statusFunc{
-	netStatus("wlp3s0", "enp0s25"),
-	batteryStatus("BAT0", "BAT1"),
+	netStatus("wlp4s0", "enp0s31f6"),
+	batteryStatus("BAT0"),
 	audioStatus(),
 	timeStatus,
 }

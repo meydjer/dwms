@@ -69,7 +69,7 @@ var AudioFmt = func(vol int, muted bool) string {
 }
 
 var TimeFmt = func(t time.Time) string {
-	return t.Format("τ01/02-15:04")
+	return t.Format("τ01/02·15:04")
 }
 
 var StatusFmt = func(stats []string) string {

@@ -18,6 +18,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/cloudfoundry/gosigar"
 	"github.com/BurntSushi/xgb"
 	"github.com/BurntSushi/xgb/xproto"
 )
@@ -147,6 +148,15 @@ func batteryStatus(batts ...string) statusFunc {
 		}
 		return BatteryFmt(battStats)
 	}
+}
+
+func memStatus() string {
+	var conSigar sigar.ConcreteSigar
+	mem, err := conSigar.GetMem()
+	if err != nil {
+		return Unknown
+	}
+	return "M:"+strconv.FormatUint(mem.ActualFree / 1024 / 1024, 10)
 }
 
 func audioStatus(args ...string) statusFunc {

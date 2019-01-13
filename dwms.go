@@ -43,14 +43,14 @@ var WifiFmt = func(dev, ssid string, up bool) string {
 	if !up {
 		return ""
 	}
-	return fmt.Sprintf("W:\"%s\"", ssid)
+	return fmt.Sprintf("·\"%s\"", ssid)
 }
 
 var WiredFmt = func(dev string, speed int, up bool) string {
 	if !up {
 		return ""
 	}
-	return "E:" + strconv.Itoa(speed)
+	return "·" + strconv.Itoa(speed)
 }
 
 var NetFmt = func(devs []string) string {
@@ -58,15 +58,46 @@ var NetFmt = func(devs []string) string {
 }
 
 var BatteryDevFmt = func(pct int, state string) string {
-	return strconv.Itoa(pct) + map[string]string{"Charging": "+", "Discharging": "-"}[state]
+	return strconv.Itoa(pct) + map[string]string{"Charging": "", "Discharging": ""}[state]
 }
 
 var BatteryFmt = func(bats []string) string {
-	return "B:" + strings.Join(bats, "/")
+	reg, err := regexp.Compile("[^0-9]+")
+	if err != nil {
+		log.Fatal(err)
+	}
+	lvlStr := reg.ReplaceAllString(bats[0], "")
+	lvl, err := strconv.ParseUint(lvlStr, 10, 32)
+	if err != nil {
+		log.Fatal(err)
+	}
+	var icon string
+	switch {
+		case lvl >= 80:
+			icon = ""	
+		case lvl >= 60:
+			icon = ""	
+		case lvl >= 40:
+			icon = ""	
+		case lvl >= 20:
+			icon = ""	
+		default:
+			icon = ""
+	}
+	return icon + "·" + strings.Join(bats, "/")
 }
 
 var AudioFmt = func(vol int, muted bool) string {
-	return map[bool]string{false: "V:", true: "M:"}[muted] + strconv.Itoa(vol)
+	var icon string
+	switch {
+		case vol >= 50:
+			icon = ""
+		case vol >= 20:
+			icon = ""
+		default:
+			icon = ""
+	}
+	return map[bool]string{false: icon + "·", true: "·"}[muted] + strconv.Itoa(vol)
 }
 
 var TimeFmt = func(t time.Time) string {
@@ -146,7 +177,7 @@ func memStatus() string {
 	if err != nil {
 		return Unknown
 	}
-	return "R:"+strconv.FormatUint(mem.ActualFree / 1024 / 1024, 10)
+	return "·"+strconv.FormatUint(mem.ActualFree / 1024 / 1024, 10)
 }
 
 func audioStatus(args ...string) statusFunc {

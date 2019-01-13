@@ -39,11 +39,11 @@ var (
 	xroot     xproto.Window
 )
 
-var WifiFmt = func(dev, ssid string, bitrate, signal int, up bool) string {
+var WifiFmt = func(dev, ssid string, up bool) string {
 	if !up {
 		return ""
 	}
-	return fmt.Sprintf("W:%s/%d/%d", ssid, bitrate, signal)
+	return fmt.Sprintf("W:\"%s\"", ssid)
 }
 
 var WiredFmt = func(dev string, speed int, up bool) string {
@@ -77,26 +77,16 @@ var StatusFmt = func(stats []string) string {
 	return " " + strings.Join(filterEmpty(stats), " ") + " "
 }
 
-func wifiStatus(dev string) (string, int, int) {
-	ssid, bitrate, signal := "", 0, 0
+func wifiStatus(dev string) (string) {
+	ssid := ""
 	out, err := exec.Command("iw", "dev", dev, "link").Output()
 	if err != nil {
-		return ssid, bitrate, signal
+		return ssid
 	}
 	if match := ssidRE.FindSubmatch(out); len(match) >= 2 {
 		ssid = string(match[1])
 	}
-	if match := bitrateRE.FindSubmatch(out); len(match) >= 2 {
-		if br, err := strconv.Atoi(string(match[1])); err == nil {
-			bitrate = br
-		}
-	}
-	if match := signalRE.FindSubmatch(out); len(match) >= 2 {
-		if sig, err := strconv.Atoi(string(match[1])); err == nil {
-			signal = sig
-		}
-	}
-	return ssid, bitrate, signal
+	return ssid
 }
 
 func wiredStatus(dev string) int {
@@ -111,8 +101,8 @@ func netDevStatus(dev string) string {
 	status, err := sysfsStringVal(filepath.Join(netSysPath, dev, "operstate"))
 	up := err == nil && status == "up"
 	if _, err = os.Stat(filepath.Join(netSysPath, dev, "wireless")); err == nil {
-		ssid, bitrate, signal := wifiStatus(dev)
-		return WifiFmt(dev, ssid, bitrate, signal, up)
+		ssid := wifiStatus(dev)
+		return WifiFmt(dev, ssid, up)
 	}
 	speed := wiredStatus(dev)
 	return WiredFmt(dev, speed, up)

@@ -43,14 +43,14 @@ var WifiFmt = func(dev, ssid string, bitrate, signal int, up bool) string {
 	if !up {
 		return ""
 	}
-	return fmt.Sprintf("ω%s/%d/%d", ssid, bitrate, signal)
+	return fmt.Sprintf("W:%s/%d/%d", ssid, bitrate, signal)
 }
 
 var WiredFmt = func(dev string, speed int, up bool) string {
 	if !up {
 		return ""
 	}
-	return "ε" + strconv.Itoa(speed)
+	return "E:" + strconv.Itoa(speed)
 }
 
 var NetFmt = func(devs []string) string {
@@ -62,15 +62,15 @@ var BatteryDevFmt = func(pct int, state string) string {
 }
 
 var BatteryFmt = func(bats []string) string {
-	return "β" + strings.Join(bats, "/")
+	return "B:" + strings.Join(bats, "/")
 }
 
 var AudioFmt = func(vol int, muted bool) string {
-	return map[bool]string{false: "ν", true: "μ"}[muted] + strconv.Itoa(vol)
+	return map[bool]string{false: "V:", true: "M:"}[muted] + strconv.Itoa(vol)
 }
 
 var TimeFmt = func(t time.Time) string {
-	return t.Format("τ01/02·15:04")
+	return t.Format("01/02·15:04")
 }
 
 var StatusFmt = func(stats []string) string {
@@ -156,7 +156,7 @@ func memStatus() string {
 	if err != nil {
 		return Unknown
 	}
-	return "M:"+strconv.FormatUint(mem.ActualFree / 1024 / 1024, 10)
+	return "R:"+strconv.FormatUint(mem.ActualFree / 1024 / 1024, 10)
 }
 
 func audioStatus(args ...string) statusFunc {

@@ -5,7 +5,6 @@ package main
 
 import (
 	"bytes"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -39,22 +38,22 @@ var (
 	xroot     xproto.Window
 )
 
-var WifiFmt = func(dev, ssid string, up bool) string {
-	if !up {
-		return ""
+var WifiFmt = func(up bool) string {
+	if up {
+		return ""
 	}
-	return fmt.Sprintf("·\"%s\"", ssid)
+	return ""
 }
 
-var WiredFmt = func(dev string, speed int, up bool) string {
-	if !up {
-		return ""
+var WiredFmt = func(up bool) string {
+	if up {
+		return ""
 	}
-	return "·" + strconv.Itoa(speed)
+	return ""
 }
 
 var NetFmt = func(devs []string) string {
-	return strings.Join(filterEmpty(devs), " ")
+	return strings.Join(filterEmpty(devs), " ")+" "
 }
 
 var BatteryDevFmt = func(pct int, state string) string {
@@ -108,35 +107,13 @@ var StatusFmt = func(stats []string) string {
 	return " " + strings.Join(filterEmpty(stats), " ") + " "
 }
 
-func wifiStatus(dev string) (string) {
-	ssid := ""
-	out, err := exec.Command("iw", "dev", dev, "link").Output()
-	if err != nil {
-		return ssid
-	}
-	if match := ssidRE.FindSubmatch(out); len(match) >= 2 {
-		ssid = string(match[1])
-	}
-	return ssid
-}
-
-func wiredStatus(dev string) int {
-	speed, err := sysfsIntVal(filepath.Join(netSysPath, dev, "speed"))
-	if err != nil {
-		return 0
-	}
-	return speed
-}
-
 func netDevStatus(dev string) string {
 	status, err := sysfsStringVal(filepath.Join(netSysPath, dev, "operstate"))
 	up := err == nil && status == "up"
 	if _, err = os.Stat(filepath.Join(netSysPath, dev, "wireless")); err == nil {
-		ssid := wifiStatus(dev)
-		return WifiFmt(dev, ssid, up)
+		return WifiFmt(up)
 	}
-	speed := wiredStatus(dev)
-	return WiredFmt(dev, speed, up)
+	return WiredFmt(up)
 }
 
 func netStatus(devs ...string) statusFunc {
